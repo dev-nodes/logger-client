@@ -1,11 +1,14 @@
+const ReconnectingWebSocket  = require('reconnecting-websocket')
 const WebSocket = require("ws")
-
+const options = {
+    WebSocket: WebSocket,
+    connectionTimeout: 5000
+}
 exports.instance = function(wsurl,app) {
-const url = new URL(wsurl)
-url.protocol = url.protocol == "ws:" ? "http:": "https:"
-const ws = new WebSocket(wsurl,{ origin: url.origin})
+const ws = new ReconnectingWebSocket(wsurl,[],options)
 ws.onerror = function(e) {
   console.log(e.message)
+  ws.conn
 }
 return new Promise(resolve => {
   ws.onopen = function() {
