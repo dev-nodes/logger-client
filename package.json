@@ -10,6 +10,7 @@
     "access": "public"
   },
   "dependencies": {
+    "reconnecting-websocket": "^4.4.0",
     "ws": "^7.3.1"
   }
 }
