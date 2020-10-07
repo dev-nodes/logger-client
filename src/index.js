@@ -29,7 +29,9 @@ exports.instance = function(wsurl, app) {
             ws.close();
           }
         },
-        connected: ws.readyState === ws.OPEN
+        connected() {
+          return ws.readyState === ws.OPEN
+        }
       };
       resolve(logApi);
     };
