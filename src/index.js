@@ -13,6 +13,11 @@ exports.instance = function(wsurl, app) {
   ws.onclose = function() {
     console.log(`[${app}] logging socket closed`);
   }
+  const addToQueue = (payload) => {
+    if(process.env.LOGGING != 'disable') {
+      queue.push(payload)
+    }
+  }
   const queuRunner = () => {
     if(queue.length) {
       for(const l of queue) {
@@ -25,6 +30,7 @@ exports.instance = function(wsurl, app) {
   }
   ws.onopen = function() {
     if(process.env.LOGGING == 'disable') {
+      queue = []
       ws.close();
     }else {
       console.log(`[${app}] logging socket connected`)
@@ -37,7 +43,7 @@ exports.instance = function(wsurl, app) {
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }else {
-        queue.push(payload)
+        addToQueue(payload)
       }
     },
     error(...args) {
@@ -45,7 +51,7 @@ exports.instance = function(wsurl, app) {
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }else {
-        queue.push(payload)
+        addToQueue(payload)
       }
     },
     info(...args) {
@@ -53,7 +59,7 @@ exports.instance = function(wsurl, app) {
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }else {
-        queue.push(payload)
+        addToQueue(payload)
       }
     },
     close() {
