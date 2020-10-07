@@ -4,6 +4,7 @@ const options = {
   WebSocket: WebSocket,
   connectionTimeout: 5000
 }
+let queue = [];
 exports.instance = function(wsurl, app) {
   const ws = new ReconnectingWebSocket(wsurl, [], options)
   ws.onerror = function(e) {
@@ -12,28 +13,54 @@ exports.instance = function(wsurl, app) {
   ws.onclose = function() {
     console.log(`[${app}] logging socket closed`);
   }
-  return new Promise(resolve => {
-    ws.onopen = function() {
-      const logApi = {
-        log(...args) {
-          ws.send(JSON.stringify({ app, type: "log", data: args.join(" ") }));
-        },
-        error(...args) {
-          ws.send(JSON.stringify({ app, type: "error", data: args.join(" ") }));
-        },
-        info(...args) {
-          ws.send(JSON.stringify({ app, type: "info", data: args.join(" ") }));
-        },
-        close() {
-          if (ws.readyState !== ws.CLOSED) {
-            ws.close();
-          }
-        },
-        connected() {
-          return ws.readyState === ws.OPEN
+  const queuRunner = () => {
+    if(queue.length) {
+      for(const l of queue) {
+        if (ws.readyState === ws.OPEN) {
+          ws.send(l);
         }
-      };
-      resolve(logApi);
-    };
-  })
+      }
+      queue = [];
+    }
+  }
+  ws.onopen = function() {
+    console.log(`[${app}] logging socket connected`)
+    queuRunner();
+  }
+  const logApi = {
+    log(...args) {
+      const payload = JSON.stringify({ app, type: "log", data: args.join(" ") })
+      if (ws.readyState === ws.OPEN) {
+        ws.send(payload);
+      }else {
+        queue.push(payload)
+      }
+    },
+    error(...args) {
+      const payload = JSON.stringify({ app, type: "log", data: args.join(" ") })
+      if (ws.readyState === ws.OPEN) {
+        ws.send(payload);
+      }else {
+        queue.push(payload)
+      }
+    },
+    info(...args) {
+      const payload = JSON.stringify({ app, type: "log", data: args.join(" ") })
+      if (ws.readyState === ws.OPEN) {
+        ws.send(payload);
+      }else {
+        queue.push(payload)
+      }
+    },
+    close() {
+      if (ws.readyState !== ws.CLOSED) {
+        queue = []
+        ws.close();
+      }
+    },
+    connected() {
+      return ws.readyState === ws.OPEN
+    }
+  };
+  return logApi;
 }
