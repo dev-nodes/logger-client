@@ -28,7 +28,8 @@ exports.instance = function(wsurl, app) {
           if (ws.readyState !== ws.CLOSED) {
             ws.close();
           }
-        }
+        },
+        connected: ws.readyState === ws.OPEN
       };
       resolve(logApi);
     };
