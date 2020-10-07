@@ -24,8 +24,12 @@ exports.instance = function(wsurl, app) {
     }
   }
   ws.onopen = function() {
-    console.log(`[${app}] logging socket connected`)
-    queuRunner();
+    if(process.env.LOGGING == 'disable') {
+      ws.close();
+    }else {
+      console.log(`[${app}] logging socket connected`)
+      queuRunner();
+    }
   }
   const logApi = {
     log(...args) {
