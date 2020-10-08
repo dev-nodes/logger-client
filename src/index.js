@@ -47,7 +47,7 @@ exports.instance = function(wsurl, app) {
       }
     },
     error(...args) {
-      const payload = JSON.stringify({ app, type: "log", data: args.join(" ") })
+      const payload = JSON.stringify({ app, type: "error", data: args.join(" ") })
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }else {
@@ -55,7 +55,7 @@ exports.instance = function(wsurl, app) {
       }
     },
     info(...args) {
-      const payload = JSON.stringify({ app, type: "log", data: args.join(" ") })
+      const payload = JSON.stringify({ app, type: "info", data: args.join(" ") })
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }else {
